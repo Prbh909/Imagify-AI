@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -14,18 +13,17 @@ export default async function handler(req, res) {
     });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({
-      error: "OPENAI_API_KEY is missing from Vercel Environment Variables."
+      error: "GEMINI_API_KEY is missing in Vercel."
     });
   }
 
   try {
     let body = req.body;
 
-    // Vercel can provide req.body as either an object or a string.
     if (typeof body === "string") {
       body = JSON.parse(body);
     }
@@ -34,231 +32,156 @@ export default async function handler(req, res) {
 
     if (!image || typeof image !== "string") {
       return res.status(400).json({
-        error: "No image was received by the AI server."
+        error: "No image was received."
       });
     }
 
-    if (!image.startsWith("data:image/")) {
+    const match = image.match(
+      /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/
+    );
+
+    if (!match) {
       return res.status(400).json({
-        error: "Invalid image format. Please upload a JPG or PNG image."
+        error: "Invalid image format."
       });
     }
 
-    if (image.length > 10_000_000) {
-      return res.status(413).json({
-        error: "Image is too large. Please choose a smaller image."
-      });
-    }
+    const mimeType = match[1];
+    const base64Image = match[2];
 
     const prompt = `
-You are the computer-vision AI inside a Class 12 school project called Imagify.
+You are the computer vision AI inside a Class 12 school project called "Imagify".
 
-Analyze the ACTUAL IMAGE provided to you.
+Analyze the ACTUAL IMAGE provided.
 
 Identify the main visible subject as accurately as possible.
 
-Return useful information based ONLY on what can reasonably be determined from the image.
+Give concise but useful information suitable for a school project.
 
-The result must be suitable for displaying in an organized school-project interface.
-
-Rules:
-- Identify the main object, subject, animal, plant, food, device, scene, etc.
-- Give a confidence score from 0 to 100.
-- Explain the visible clues supporting the identification.
+IMPORTANT:
+- Base your answer only on visible evidence.
+- Do not invent details.
+- If uncertain, clearly say so.
+- Give confidence from 0 to 100.
+- Explain the visual clues.
 - Describe important visible characteristics.
-- Mention readable text if present.
-- Mention likely purpose or use when reasonably identifiable.
-- If it is food, give APPROXIMATE nutrition information and general benefits.
-- Never claim exact calories, ingredients, freshness, contamination, allergies or food safety from an image alone.
-- If something cannot be determined, clearly say that.
-- Do not invent information.
-- Keep the answer concise but informative.
-- Do not return one huge paragraph.
+- Mention readable text if visible.
+- Explain likely purpose/use when reasonably identifiable.
+- If it is food, provide approximate nutrition information.
+- Nutrition must be clearly labelled as an estimate.
+- Do not claim exact calories, ingredients, freshness, contamination, allergens, or safety from pixels alone.
+- If it is not food, food information should say "Not applicable".
+- Keep everything organized.
+- Do not write one giant paragraph.
 
-Return ONLY valid JSON.
+Return ONLY JSON using exactly this structure:
+
+{
+  "primary_identification": "",
+  "category": "",
+  "confidence": 0,
+  "description": "",
+  "visual_evidence": "",
+  "visible_characteristics": [],
+  "scene_context": "",
+  "visible_text": "",
+  "uses_or_purpose": "",
+  "food": {
+    "is_food": false,
+    "edibility_status": "",
+    "nutrition_estimate": "",
+    "benefits": "",
+    "safety": ""
+  },
+  "safety_and_uncertainty": "",
+  "alternatives": [],
+  "final_summary": ""
+}
 `;
 
-    const openAIResponse = await fetch(
-      "https://api.openai.com/v1/responses",
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+        encodeURIComponent(apiKey),
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "gpt-5.6-luna",
-          store: false,
-          input: [
+          contents: [
             {
-              role: "user",
-              content: [
+              parts: [
                 {
-                  type: "input_text",
                   text: prompt
                 },
                 {
-                  type: "input_image",
-                  image_url: image,
-                  detail: "high"
+                  inline_data: {
+                    mime_type: mimeType,
+                    data: base64Image
+                  }
                 }
               ]
             }
           ],
-          text: {
-            format: {
-              type: "json_schema",
-              name: "imagify_result",
-              strict: true,
-              schema: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  primary_identification: {
-                    type: "string"
-                  },
-                  category: {
-                    type: "string"
-                  },
-                  confidence: {
-                    type: "number"
-                  },
-                  description: {
-                    type: "string"
-                  },
-                  visual_evidence: {
-                    type: "string"
-                  },
-                  visible_characteristics: {
-                    type: "array",
-                    items: {
-                      type: "string"
-                    }
-                  },
-                  scene_context: {
-                    type: "string"
-                  },
-                  visible_text: {
-                    type: "string"
-                  },
-                  uses_or_purpose: {
-                    type: "string"
-                  },
-                  food: {
-                    type: "object",
-                    additionalProperties: false,
-                    properties: {
-                      is_food: {
-                        type: "boolean"
-                      },
-                      edibility_status: {
-                        type: "string"
-                      },
-                      nutrition_estimate: {
-                        type: "string"
-                      },
-                      benefits: {
-                        type: "string"
-                      },
-                      safety: {
-                        type: "string"
-                      }
-                    },
-                    required: [
-                      "is_food",
-                      "edibility_status",
-                      "nutrition_estimate",
-                      "benefits",
-                      "safety"
-                    ]
-                  },
-                  safety_and_uncertainty: {
-                    type: "string"
-                  },
-                  alternatives: {
-                    type: "array",
-                    items: {
-                      type: "string"
-                    }
-                  },
-                  final_summary: {
-                    type: "string"
-                  }
-                },
-                required: [
-                  "primary_identification",
-                  "category",
-                  "confidence",
-                  "description",
-                  "visual_evidence",
-                  "visible_characteristics",
-                  "scene_context",
-                  "visible_text",
-                  "uses_or_purpose",
-                  "food",
-                  "safety_and_uncertainty",
-                  "alternatives",
-                  "final_summary"
-                ]
-              }
-            }
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json"
           }
         })
       }
     );
 
-    const rawText = await openAIResponse.text();
+    const raw = await response.text();
 
-    if (!openAIResponse.ok) {
-      console.error("OpenAI HTTP error:", openAIResponse.status);
-      console.error(rawText);
+    if (!response.ok) {
+      console.error("Gemini error:", response.status, raw);
 
-      let errorMessage = rawText;
+      let message = raw;
 
       try {
-        const errorJSON = JSON.parse(rawText);
-        errorMessage =
-          errorJSON?.error?.message ||
-          errorJSON?.message ||
-          rawText;
+        const parsed = JSON.parse(raw);
+        message =
+          parsed?.error?.message ||
+          parsed?.error?.status ||
+          raw;
       } catch {}
 
-      return res.status(openAIResponse.status).json({
-        error: `OpenAI error: ${errorMessage}`
+      return res.status(response.status).json({
+        error: `Gemini error: ${message}`
       });
     }
 
-    let responseData;
+    let data;
 
     try {
-      responseData = JSON.parse(rawText);
+      data = JSON.parse(raw);
     } catch {
-      console.error("Invalid OpenAI response:", rawText);
-
       return res.status(502).json({
-        error: "The AI server returned an invalid response."
+        error: "Gemini returned an invalid server response."
       });
     }
 
-    const outputText = responseData.output_text;
+    const output =
+      data?.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "")
+        .join("")
+        .trim();
 
-    if (!outputText) {
-      console.error("No output_text:", responseData);
-
+    if (!output) {
       return res.status(502).json({
-        error: "The AI returned no analysis."
+        error: "Gemini returned no image analysis."
       });
     }
 
     let analysis;
 
     try {
-      analysis = JSON.parse(outputText);
+      analysis = JSON.parse(output);
     } catch {
-      console.error("AI JSON parsing failed:", outputText);
+      console.error("Gemini JSON:", output);
 
       return res.status(502).json({
-        error: "The AI returned an invalid analysis format."
+        error: "Gemini returned an invalid analysis."
       });
     }
 
@@ -275,12 +198,10 @@ Return ONLY valid JSON.
     });
 
   } catch (error) {
-    console.error("Imagify server error:", error);
+    console.error("Imagify error:", error);
 
     return res.status(500).json({
-      error:
-        error?.message ||
-        "Unexpected error while analyzing the image."
+      error: error?.message || "Image analysis failed."
     });
   }
 }
