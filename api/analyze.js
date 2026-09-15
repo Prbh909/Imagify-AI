@@ -50,31 +50,36 @@ export default async function handler(req, res) {
     const base64Image = match[2];
 
     const prompt = `
-You are the computer vision AI inside a Class 12 school project called "Imagify".
+You are Imagify, an AI image-analysis system created as a Class XII
+Artificial Intelligence school project.
 
-Analyze the ACTUAL IMAGE provided.
+Analyze the ACTUAL IMAGE supplied with this request.
 
 Identify the main visible subject as accurately as possible.
 
-Give concise but useful information suitable for a school project.
+Return useful, organized information based ONLY on visible evidence.
 
-IMPORTANT:
-- Base your answer only on visible evidence.
-- Do not invent details.
-- If uncertain, clearly say so.
-- Give confidence from 0 to 100.
-- Explain the visual clues.
-- Describe important visible characteristics.
-- Mention readable text if visible.
-- Explain likely purpose/use when reasonably identifiable.
-- If it is food, provide approximate nutrition information.
-- Nutrition must be clearly labelled as an estimate.
-- Do not claim exact calories, ingredients, freshness, contamination, allergens, or safety from pixels alone.
-- If it is not food, food information should say "Not applicable".
-- Keep everything organized.
-- Do not write one giant paragraph.
+IMPORTANT RULES:
 
-Return ONLY JSON using exactly this structure:
+1. Identify the main object, animal, plant, food, device, scene,
+   or other visible subject.
+2. Give a confidence score from 0 to 100.
+3. Explain the visual evidence supporting the identification.
+4. Describe important visible characteristics.
+5. Mention readable text if visible.
+6. Explain likely purpose or use when reasonably identifiable.
+7. If the image contains food, provide approximate nutrition
+   information and general benefits.
+8. Clearly label nutrition as an estimate.
+9. Never claim exact calories, ingredients, freshness,
+   contamination, allergens, or food safety from an image alone.
+10. If it is not food, food fields must say "Not applicable".
+11. If identification is uncertain, say so.
+12. Do not invent information.
+13. Keep the information concise and organized.
+14. Do not produce one giant paragraph.
+
+Return ONLY valid JSON with this exact structure:
 
 {
   "primary_identification": "",
@@ -99,34 +104,35 @@ Return ONLY JSON using exactly this structure:
 }
 `;
 
+    /*
+      Gemini Interactions API
+      Current multimodal model:
+      gemini-3.6-flash
+    */
+
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-        encodeURIComponent(apiKey),
+      "https://generativelanguage.googleapis.com/v1beta/interactions",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+          "Api-Revision": "2026-05-20"
         },
         body: JSON.stringify({
-          contents: [
+          model: "gemini-3.6-flash",
+
+          input: [
             {
-              parts: [
-                {
-                  text: prompt
-                },
-                {
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: base64Image
-                  }
-                }
-              ]
+              type: "image",
+              mime_type: mimeType,
+              data: base64Image
+            },
+            {
+              type: "text",
+              text: prompt
             }
-          ],
-          generationConfig: {
-            temperature: 0.2,
-            responseMimeType: "application/json"
-          }
+          ]
         })
       }
     );
@@ -134,15 +140,20 @@ Return ONLY JSON using exactly this structure:
     const raw = await response.text();
 
     if (!response.ok) {
-      console.error("Gemini error:", response.status, raw);
+      console.error(
+        "Gemini HTTP error:",
+        response.status,
+        raw
+      );
 
       let message = raw;
 
       try {
         const parsed = JSON.parse(raw);
+
         message =
           parsed?.error?.message ||
-          parsed?.error?.status ||
+          parsed?.message ||
           raw;
       } catch {}
 
@@ -157,17 +168,30 @@ Return ONLY JSON using exactly this structure:
       data = JSON.parse(raw);
     } catch {
       return res.status(502).json({
-        error: "Gemini returned an invalid server response."
+        error: "Gemini returned an invalid response."
       });
     }
 
-    const output =
-      data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
-        .join("")
-        .trim();
+    /*
+      Interactions API returns model output
+      inside interaction steps.
+    */
 
-    if (!output) {
+    const outputText =
+      data?.steps
+        ?.filter(step => step?.type === "model_output")
+        ?.flatMap(step => step?.content || [])
+        ?.filter(item => item?.type === "text")
+        ?.map(item => item.text || "")
+        ?.join("")
+        ?.trim();
+
+    if (!outputText) {
+      console.error(
+        "Gemini returned no usable output:",
+        JSON.stringify(data)
+      );
+
       return res.status(502).json({
         error: "Gemini returned no image analysis."
       });
@@ -176,12 +200,15 @@ Return ONLY JSON using exactly this structure:
     let analysis;
 
     try {
-      analysis = JSON.parse(output);
+      analysis = JSON.parse(outputText);
     } catch {
-      console.error("Gemini JSON:", output);
+      console.error(
+        "Gemini returned non-JSON output:",
+        outputText
+      );
 
       return res.status(502).json({
-        error: "Gemini returned an invalid analysis."
+        error: "Gemini returned an invalid analysis format."
       });
     }
 
@@ -198,10 +225,12 @@ Return ONLY JSON using exactly this structure:
     });
 
   } catch (error) {
-    console.error("Imagify error:", error);
+    console.error("Imagify server error:", error);
 
     return res.status(500).json({
-      error: error?.message || "Image analysis failed."
+      error:
+        error?.message ||
+        "Unexpected error during image analysis."
     });
   }
 }
