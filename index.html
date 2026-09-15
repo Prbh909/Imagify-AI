@@ -1,254 +1,2772 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#08090d">
-<title>Imagify — AI Image Intelligence</title>
-<style>
-:root{--bg:#07080c;--panel:#0f1118;--panel2:#151821;--line:#252a36;--text:#f7f8fb;--muted:#969dab;--accent:#7c5cff;--accent2:#26e6a6;--danger:#ff647c;--shadow:0 24px 80px rgba(0,0,0,.35)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 15% -10%,#241a55 0,transparent 34%),radial-gradient(circle at 90% 0,#073f39 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
-button,input{font:inherit}.hidden{display:none!important}.app{min-height:100vh}
-.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:16px 5%;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(7,8,12,.76);backdrop-filter:blur(20px)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:850;letter-spacing:-.5px}.mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#22d9ff);box-shadow:0 0 30px rgba(124,92,255,.35)}
-.navlinks{display:flex;gap:6px}.navlinks button{border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:10px;cursor:pointer}.navlinks button.active,.navlinks button:hover{background:#171a23;color:#fff}
-main{width:min(1180px,90%);margin:auto}.view{display:none}.view.active{display:block}
-.hero{min-height:650px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:70px 0}
-.eyebrow{display:inline-flex;padding:7px 10px;border:1px solid #333846;border-radius:999px;color:#aeb5c4;font-size:11px;letter-spacing:1.3px;font-weight:800;background:#0e1016}
-h1{font-size:clamp(56px,8vw,100px);line-height:.9;letter-spacing:-6px;margin:20px 0}.gradient{background:linear-gradient(100deg,#fff 25%,#8e7cff 62%,#31e8bc);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{max-width:650px;color:var(--muted);font-size:18px;line-height:1.7}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
-.btn{border:1px solid var(--line);background:#151821;color:#fff;padding:13px 17px;border-radius:12px;font-weight:750;cursor:pointer;transition:.2s;box-shadow:0 8px 25px rgba(0,0,0,.12)}.btn:hover{transform:translateY(-2px);border-color:#454b5b}.btn.primary{border:0;background:linear-gradient(135deg,var(--accent),#5b8cff)}.btn.green{border:0;background:linear-gradient(135deg,#19b987,#26e6a6);color:#03120d}
-.hero-card{position:relative;min-height:450px;border:1px solid #2a2f3c;border-radius:30px;background:linear-gradient(145deg,#11141c,#0a0c11);box-shadow:var(--shadow);overflow:hidden;display:grid;place-items:center}
-.orbit{width:280px;height:280px;border:1px solid #3b3f50;border-radius:50%;position:relative;animation:spin 16s linear infinite}.orbit:before,.orbit:after{content:"";position:absolute;border-radius:50%;background:var(--accent);box-shadow:0 0 35px var(--accent)}.orbit:before{width:12px;height:12px;left:30px;top:55px}.orbit:after{width:9px;height:9px;right:42px;bottom:55px;background:var(--accent2);box-shadow:0 0 30px var(--accent2)}
-.core{position:absolute;width:125px;height:125px;border-radius:35px;background:linear-gradient(135deg,#161a28,#242a3c);border:1px solid #444b61;display:grid;place-items:center;box-shadow:0 0 70px rgba(124,92,255,.35);animation:pulse 2.8s ease-in-out infinite}.scanline{position:absolute;width:75%;height:1px;background:linear-gradient(90deg,transparent,#26e6a6,transparent);animation:scan 3s ease-in-out infinite}
-.section-title{font-size:34px;letter-spacing:-1.5px;margin:0}.sub{color:var(--muted);line-height:1.6}
-.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 80px}.feature{padding:23px;border:1px solid var(--line);border-radius:20px;background:rgba(15,17,24,.8)}.feature b{display:block;margin:12px 0 7px}.feature p{font-size:14px;margin:0;color:var(--muted);line-height:1.6}
-.panel{margin:55px 0 80px;padding:28px;border:1px solid var(--line);border-radius:25px;background:rgba(15,17,24,.88);box-shadow:var(--shadow)}
-.upload{border:1.5px dashed #3b4150;border-radius:20px;min-height:240px;display:grid;place-items:center;text-align:center;padding:25px;background:radial-gradient(circle at 50% 0,#1a1931,transparent 55%)}.upload:hover{border-color:#696f83}
-.preview{width:100%;max-height:500px;object-fit:contain;border-radius:17px;background:#08090d}.preview-wrap{position:relative;margin-top:18px}.reticle{position:absolute;inset:12%;border:1px solid rgba(38,230,166,.7);border-radius:18px;box-shadow:0 0 35px rgba(38,230,166,.15);pointer-events:none}
-.progress{height:5px;border-radius:99px;background:#202430;overflow:hidden;margin:18px 0}.progress i{display:block;height:100%;width:35%;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:load 1.2s ease-in-out infinite}
-.status{color:var(--muted);font-size:13px}
-.result-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.confidence{font-size:28px;font-weight:850;color:#26e6a6}.detected{font-size:42px;letter-spacing:-2px;margin:5px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px}.info{padding:18px;border:1px solid var(--line);border-radius:16px;background:#11141b}.info small{display:block;color:#7f8695;font-weight:800;letter-spacing:1px;text-transform:uppercase;font-size:10px;margin-bottom:8px}.info div{line-height:1.55;color:#e5e8ee}
-.info.wide{grid-column:1/-1}.pillrow{display:flex;flex-wrap:wrap;gap:7px}.pill{padding:7px 10px;border-radius:999px;background:#1b1f29;color:#d9ddea;font-size:12px}
-.camera{position:relative;border-radius:24px;overflow:hidden;background:#020305;border:1px solid var(--line);min-height:420px}.camera video{width:100%;height:100%;min-height:420px;object-fit:cover;display:block}.camera-ui{position:absolute;inset:0;padding:22px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 35%,rgba(0,0,0,.6))}.live-badge{display:inline-flex;width:max-content;gap:7px;align-items:center;background:rgba(0,0,0,.55);padding:8px 11px;border-radius:999px;font-size:11px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:#ff526d;box-shadow:0 0 12px #ff526d;animation:blink 1s infinite}.target{position:absolute;left:25%;right:25%;top:23%;bottom:28%;border:1px solid rgba(38,230,166,.75);border-radius:25px;box-shadow:0 0 40px rgba(38,230,166,.12)}.live-label{align-self:center;background:rgba(7,8,12,.8);border:1px solid #343b49;padding:10px 15px;border-radius:13px;text-align:center;backdrop-filter:blur(12px)}.live-label b{font-size:20px}.live-label span{display:block;color:#26e6a6;font-size:11px;margin-top:3px}
-.history-list{display:grid;gap:10px}.history-item{display:flex;align-items:center;gap:15px;padding:12px;border:1px solid var(--line);background:#10131a;border-radius:16px}.history-item img{width:70px;height:70px;object-fit:cover;border-radius:12px}.history-item main{width:auto;margin:0;flex:1}.history-item p{margin:3px 0;color:var(--muted);font-size:12px}
-footer{border-top:1px solid var(--line);padding:25px 5%;color:#747b89;font-size:12px;display:flex;justify-content:space-between}
-.toast{position:fixed;right:22px;bottom:22px;background:#161a23;border:1px solid #343a49;padding:13px 15px;border-radius:13px;box-shadow:var(--shadow);z-index:100;transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}.toast.show{transform:none;opacity:1}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.07);box-shadow:0 0 95px rgba(124,92,255,.55)}}@keyframes scan{0%,100%{transform:translateY(-170px);opacity:0}35%,65%{opacity:1}50%{transform:translateY(170px)}}@keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(350%)}}@keyframes blink{50%{opacity:.35}}
-@media(max-width:850px){.hero{grid-template-columns:1fr;padding:50px 0}.hero-card{min-height:330px}.feature-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.info.wide{grid-column:auto}.navlinks button{padding:8px}.detected{font-size:32px}}
-@media(max-width:560px){h1{letter-spacing:-4px}.nav{padding:12px 4%}.brand{font-size:15px}.navlinks button{font-size:11px;padding:7px}.hero-card{display:none}.panel{padding:17px}.result-head{flex-direction:column}.camera,.camera video{min-height:430px}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070a12" />
+  <meta
+    name="description"
+    content="Imagify — AI-powered image classification and visual intelligence."
+  />
+  <title>Imagify — AI Image Intelligence</title>
+
+  <style>
+    :root {
+      --bg: #070a12;
+      --bg-soft: #0b1020;
+      --panel: rgba(17, 24, 39, 0.72);
+      --panel-solid: #101625;
+      --text: #f6f8fc;
+      --muted: #9aa5b6;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #7c5cff;
+      --accent2: #25d8ff;
+      --green: #48e6a0;
+      --danger: #ff6b7a;
+      --radius: 22px;
+      --shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at 10% 0%,
+          rgba(124, 92, 255, 0.18),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at 90% 5%,
+          rgba(37, 216, 255, 0.12),
+          transparent 27%
+        ),
+        var(--bg);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================== */
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 10, 18, 0.76);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: auto;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      border: 0;
+      background: transparent;
+      color: white;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      padding: 0;
+    }
+
+    .brand span {
+      color: var(--accent2);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: #bfc7d5;
+      padding: 9px 12px;
+      border-radius: 12px;
+      transition:
+        0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--line);
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: auto;
+      padding: 30px 0 70px;
+    }
+
+    .screen {
+      display: none;
+      animation: screenIn 0.4s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes screenIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      min-height: 600px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 45px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      color: #abb6c8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+    }
+
+    .hero h1 {
+      margin: 16px 0;
+      font-size: clamp(50px, 7vw, 88px);
+      line-height: 0.94;
+      letter-spacing: -4px;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(
+        90deg,
+        #ffffff,
+        #b6edff 48%,
+        #917dff
+      );
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .hero-description {
+      max-width: 650px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 28px;
+    }
+
+    .primary,
+    .secondary,
+    .danger {
+      border-radius: 14px;
+      padding: 12px 17px;
+      font-weight: 800;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .primary {
+      border: 0;
+      color: white;
+      background: linear-gradient(
+        135deg,
+        var(--accent),
+        #4f8fff
+      );
+      box-shadow: 0 13px 32px rgba(124, 92, 255, 0.22);
+    }
+
+    .secondary {
+      color: white;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .danger {
+      color: white;
+      border: 1px solid rgba(255, 107, 122, 0.22);
+      background: rgba(255, 107, 122, 0.08);
+    }
+
+    .primary:hover,
+    .secondary:hover,
+    .danger:hover {
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none !important;
+    }
+
+    /* =========================
+       HERO VISUAL
+    ========================== */
+
+    .hero-visual {
+      position: relative;
+      height: 430px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(124, 92, 255, 0.13),
+          rgba(37, 216, 255, 0.055)
+        ),
+        var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-orbit {
+      position: absolute;
+      width: 245px;
+      height: 245px;
+      border: 1px solid rgba(37, 216, 255, 0.35);
+      border-radius: 50%;
+      box-shadow: 0 0 90px rgba(37, 216, 255, 0.1);
+      animation: orbitPulse 3s ease-in-out infinite;
+    }
+
+    .hero-orbit::after {
+      content: "";
+      position: absolute;
+      inset: 27px;
+      border: 1px dashed rgba(124, 92, 255, 0.45);
+      border-radius: 50%;
+      animation: spin 12s linear infinite;
+    }
+
+    .hero-core {
+      position: relative;
+      z-index: 3;
+      width: 150px;
+      height: 150px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 30px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.08),
+          rgba(255, 255, 255, 0.025)
+        ),
+        #0b1020;
+      font-size: 65px;
+      box-shadow: 0 0 60px rgba(124, 92, 255, 0.22);
+      animation: floating 4s ease-in-out infinite;
+    }
+
+    .hero-scanline {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent2),
+        transparent
+      );
+      box-shadow: 0 0 18px var(--accent2);
+      animation: scan 3.2s linear infinite;
+    }
+
+    @keyframes floating {
+      50% {
+        transform: translateY(-12px) rotate(2deg);
+      }
+    }
+
+    @keyframes orbitPulse {
+      50% {
+        transform: scale(1.08);
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes scan {
+      0% {
+        top: 18%;
+      }
+
+      50% {
+        top: 82%;
+      }
+
+      100% {
+        top: 18%;
+      }
+    }
+
+    /* =========================
+       SECTIONS
+    ========================== */
+
+    .section-title {
+      margin: 55px 0 20px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 32px;
+      letter-spacing: -1px;
+    }
+
+    .section-title p {
+      margin: 7px 0 0;
+      color: var(--muted);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.045),
+          rgba(255, 255, 255, 0.018)
+        );
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    .card-number {
+      color: var(--accent2);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .card h3 {
+      margin: 8px 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    /* =========================
+       ANALYSIS
+    ========================== */
+
+    .panel {
+      padding: 22px;
+    }
+
+    .upload-box {
+      padding: 35px 20px;
+      text-align: center;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .upload-title {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .file-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .file-button input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .preview {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      margin-top: 17px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: #03050a;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 17px;
+    }
+
+    .progress-wrap {
+      margin-top: 18px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #171d29;
+    }
+
+    .progress-bar i {
+      display: block;
+      width: 35%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(
+        90deg,
+        var(--accent),
+        var(--accent2)
+      );
+      animation: loading 1.1s infinite;
+    }
+
+    @keyframes loading {
+      from {
+        transform: translateX(-150%);
+      }
+
+      to {
+        transform: translateX(340%);
+      }
+    }
+
+    .status-text {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* =========================
+       RESULT
+    ========================== */
+
+    .result-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 28px;
+    }
+
+    .result-header h2 {
+      margin: 4px 0;
+      font-size: 30px;
+      letter-spacing: -1px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--green);
+      background: rgba(72, 230, 160, 0.1);
+      border: 1px solid rgba(72, 230, 160, 0.14);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 17px;
+    }
+
+    .info-box {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .info-box h4 {
+      margin: 0 0 7px;
+      color: #9faabd;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+    }
+
+    .info-box p {
+      margin: 0;
+      color: #e9edf4;
+      white-space: pre-line;
+    }
+
+    .characteristics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      padding: 6px 9px;
+      border: 1px solid rgba(124, 92, 255, 0.22);
+      border-radius: 999px;
+      color: #d8d1ff;
+      background: rgba(124, 92, 255, 0.11);
+      font-size: 12px;
+    }
+
+    .food-panel {
+      margin-top: 15px;
+    }
+
+    .food-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* =========================
+       LIVE CAMERA
+    ========================== */
+
+    .live-layout {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 18px;
+    }
+
+    .camera-box {
+      position: relative;
+      min-height: 460px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 25px;
+      background: #020409;
+    }
+
+    .camera-box video {
+      width: 100%;
+      height: 100%;
+      min-height: 460px;
+      display: block;
+      object-fit: cover;
+      background: #020409;
+    }
+
+    .reticle {
+      position: absolute;
+      inset: 17%;
+      border: 2px solid rgba(37, 216, 255, 0.72);
+      border-radius: 27px;
+      box-shadow:
+        0 0 30px rgba(37, 216, 255, 0.1),
+        inset 0 0 30px rgba(37, 216, 255, 0.04);
+      pointer-events: none;
+    }
+
+    .reticle::before,
+    .reticle::after {
+      content: "";
+      position: absolute;
+      width: 35px;
+      height: 35px;
+    }
+
+    .reticle::before {
+      top: -2px;
+      left: -2px;
+      border-top: 4px solid var(--accent2);
+      border-left: 4px solid var(--accent2);
+      border-radius: 12px 0 0 0;
+    }
+
+    .reticle::after {
+      right: -2px;
+      bottom: -2px;
+      border-right: 4px solid var(--accent2);
+      border-bottom: 4px solid var(--accent2);
+      border-radius: 0 0 12px 0;
+    }
+
+    .camera-hud {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(3, 6, 14, 0.74);
+      backdrop-filter: blur(14px);
+    }
+
+    .live-label {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .live-status {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pulse-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 14px var(--green);
+      animation: dotPulse 1.2s infinite;
+    }
+
+    @keyframes dotPulse {
+      50% {
+        opacity: 0.3;
+        transform: scale(0.75);
+      }
+    }
+
+    /* =========================
+       HISTORY
+    ========================== */
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .history-item:last-child {
+      border-bottom: 0;
+    }
+
+    .history-name {
+      font-weight: 900;
+    }
+
+    .history-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* =========================
+       ABOUT
+    ========================== */
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    /* =========================
+       TOAST
+    ========================== */
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 999;
+      max-width: 380px;
+      padding: 14px 17px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #101827;
+      box-shadow: var(--shadow);
+      animation: toastIn 0.25s ease;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    footer {
+      padding: 32px 20px;
+      text-align: center;
+      color: #747e8e;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 850px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding: 30px 0;
+      }
+
+      .hero h1 {
+        letter-spacing: -2.5px;
+      }
+
+      .hero-visual {
+        height: 330px;
+      }
+
+      .cards,
+      .result-grid,
+      .live-layout,
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .camera-box,
+      .camera-box video {
+        min-height: 380px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 520px) {
+      main,
+      .nav-inner {
+        width: min(100% - 22px, 1180px);
+      }
+
+      .hero h1 {
+        font-size: 50px;
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .camera-hud {
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="app">
-<nav class="nav">
-  <div class="brand"><div class="mark">✦</div>Imagify</div>
-  <div class="navlinks">
-    <button class="active" data-view="home">Home</button>
-    <button data-view="analyze">Analyze</button>
-    <button data-view="live">Live Scan</button>
-    <button data-view="history">History</button>
-  </div>
-</nav>
 
-<main>
-<section id="home" class="view active">
-  <div class="hero">
-    <div>
-      <span class="eyebrow">CLASS XII · ARTIFICIAL INTELLIGENCE PROJECT</span>
-      <h1>See it.<br><span class="gradient">Understand it.</span></h1>
-      <p>Imagify turns an image into a structured visual analysis — identifying visible objects, explaining the evidence, and giving useful context without pretending to know what the camera cannot prove.</p>
-      <div class="actions">
-        <button class="btn primary" onclick="go('analyze')">Start Analysis →</button>
-        <button class="btn green" onclick="go('live')">Open Live Camera</button>
+  <!-- =========================
+       NAVIGATION
+  ========================== -->
+
+  <header class="nav">
+    <div class="nav-inner">
+
+      <button class="brand" onclick="showScreen('home')">
+        Imagi<span>fy</span>
+      </button>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-screen="home">
+          Home
+        </button>
+
+        <button class="nav-btn" data-screen="analyze">
+          Analyze
+        </button>
+
+        <button class="nav-btn" data-screen="live">
+          Live Scan
+        </button>
+
+        <button class="nav-btn" data-screen="history">
+          History
+        </button>
+
+        <button class="nav-btn" data-screen="about">
+          About
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <main>
+
+    <!-- =========================
+         HOME
+    ========================== -->
+
+    <section id="home" class="screen active">
+
+      <div class="hero">
+
+        <div>
+
+          <div class="eyebrow">
+            CLASS XII · ARTIFICIAL INTELLIGENCE PROJECT
+          </div>
+
+          <h1>
+            <span class="gradient-text">
+              See it.<br />
+              Scan it.<br />
+              Understand it.
+            </span>
+          </h1>
+
+          <p class="hero-description">
+            Imagify turns everyday images into clear, structured insights
+            using computer vision and AI — from quick identification to
+            detailed visual explanations.
+          </p>
+
+          <div class="actions">
+
+            <button
+              class="primary"
+              onclick="showScreen('analyze')"
+            >
+              ✦ Start Image Analysis
+            </button>
+
+            <button
+              class="secondary"
+              onclick="showScreen('live')"
+            >
+              ◉ Open Live Camera
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="hero-visual">
+
+          <div class="hero-orbit"></div>
+
+          <div class="hero-scanline"></div>
+
+          <div class="hero-core">
+            ✦
+          </div>
+
+        </div>
+
       </div>
-    </div>
-    <div class="hero-card"><div class="orbit"></div><div class="core">◎</div><div class="scanline"></div></div>
-  </div>
-  <h2 class="section-title">One project. Three ways to explore.</h2>
-  <p class="sub">Designed as a student-built computer-vision project with a clear, explainable workflow.</p>
-  <div class="feature-grid">
-    <div class="feature"><span>📸</span><b>Image Analysis</b><p>Upload an image or take a photo and receive a structured AI report.</p></div>
-    <div class="feature"><span>📷</span><b>Live Scan</b><p>Point your camera at a visible object and request live visual analysis.</p></div>
-    <div class="feature"><span>🔬</span><b>Deep Analysis</b><p>Explore identification, visual clues, food information, safety and alternatives.</p></div>
-  </div>
-</section>
 
-<section id="analyze" class="view">
-  <div class="panel">
-    <span class="eyebrow">IMAGE ANALYSIS</span>
-    <h2 class="section-title" style="margin-top:14px">Upload. Analyze. Understand.</h2>
-    <p class="sub">For best results, use a clear image where the main subject is visible.</p>
-    <div class="upload" id="uploadBox">
-      <div>
-        <div style="font-size:40px">⌁</div>
-        <h3>Choose an image</h3>
-        <p class="sub">JPG, PNG, WEBP · or use your phone camera</p>
-        <label class="btn primary" for="fileInput">Select Image</label>
-        <input id="fileInput" type="file" accept="image/*" capture="environment" style="display:none">
+      <div class="section-title">
+        <h2>How Imagify works</h2>
+        <p>
+          Fast local recognition first, detailed AI analysis when you need it.
+        </p>
       </div>
-    </div>
-    <div id="previewArea" class="hidden">
-      <div class="preview-wrap"><img id="preview" class="preview"><div class="reticle"></div></div>
-      <div class="actions">
-        <button class="btn primary" id="analyzeBtn">Analyze with AI →</button>
-        <button class="btn" id="resetBtn">Choose another</button>
+
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-number">01 · CHOOSE</div>
+          <h3>Capture an image</h3>
+          <p class="muted">
+            Upload an image, take a photo, or point the live camera at
+            something you want to identify.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-number">02 · ANALYZE</div>
+          <h3>Recognize it</h3>
+          <p class="muted">
+            A fast browser-based classifier provides an immediate result
+            without waiting for a server request.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-number">03 · DISCOVER</div>
+          <h3>Know more</h3>
+          <p class="muted">
+            Request a detailed AI report with visual evidence, characteristics,
+            uses, food information and limitations.
+          </p>
+        </div>
+
       </div>
-    </div>
-    <div id="loading" class="hidden" style="margin-top:20px"><div class="progress"><i></i></div><div class="status" id="loadingText">Reading visual features…</div></div>
-  </div>
-  <div id="resultPanel" class="panel hidden"></div>
-</section>
 
-<section id="live" class="view">
-  <div class="panel">
-    <span class="eyebrow">REAL-TIME VISUAL SCAN</span>
-    <h2 class="section-title" style="margin-top:14px">Point. Detect. Explore.</h2>
-    <p class="sub">Live mode samples the camera and sends a frame for AI analysis. It is designed for demonstrations and learning, not continuous surveillance.</p>
-    <div class="camera" style="margin-top:22px">
-      <video id="video" autoplay muted playsinline></video>
-      <div class="camera-ui">
-        <div class="live-badge"><span class="dot"></span> LIVE CAMERA</div>
-        <div class="target"></div>
-        <div class="live-label"><b id="liveName">Ready</b><span id="liveConfidence">Press Start Live Scan</span></div>
+    </section>
+
+
+    <!-- =========================
+         IMAGE ANALYSIS
+    ========================== -->
+
+    <section id="analyze" class="screen">
+
+      <div class="section-title">
+        <h2>Image Analysis</h2>
+        <p>
+          Get an immediate classification, then request the complete AI report.
+        </p>
       </div>
-    </div>
-    <div class="actions">
-      <button class="btn green" id="startLive">Start Live Scan</button>
-      <button class="btn" id="stopLive">Stop Camera</button>
-      <button class="btn primary" id="moreLive">More Information →</button>
-    </div>
-    <p class="status" id="liveStatus" style="margin-top:12px">Camera permission is required. Only sampled frames are analyzed.</p>
-  </div>
-</section>
 
-<section id="history" class="view">
-  <div class="panel">
-    <div style="display:flex;justify-content:space-between;gap:15px;align-items:center">
-      <div><span class="eyebrow">LOCAL HISTORY</span><h2 class="section-title" style="margin-top:14px">Your scans</h2></div>
-      <button class="btn" id="clearHistory">Clear history</button>
-    </div>
-    <div id="historyList" class="history-list" style="margin-top:25px"></div>
-  </div>
-</section>
+      <div class="panel">
 
-<section id="about" class="view">
-  <div class="panel">
-    <span class="eyebrow">PROJECT</span>
-    <h2 class="section-title" style="margin-top:14px">About Imagify</h2>
-    <div class="grid">
-      <div class="info"><small>Project</small><div>Imagify — AI Image Intelligence</div></div>
-      <div class="info"><small>Class</small><div>Grade 12 · Artificial Intelligence</div></div>
-      <div class="info"><small>Core idea</small><div>Computer vision + structured AI analysis</div></div>
-      <div class="info"><small>Designed by</small><div>Prabhjot Singh · Project 2026</div></div>
-      <div class="info wide"><small>Important limitation</small><div>An image can provide strong visual evidence, but it cannot guarantee hidden facts such as exact weight, freshness, contamination, ingredients, allergies or medical safety. Imagify therefore separates observations from estimates and uncertainty.</div></div>
-    </div>
-  </div>
-</section>
-</main>
+        <div class="upload-box">
 
-<footer><span>Imagify · AI School Project · 2026</span><span>Made by Prabhjot Singh</span></footer>
-<div id="toast" class="toast"></div>
+          <div class="upload-title">
+            Choose an image
+          </div>
 
-<script>
-const $=s=>document.querySelector(s);
-let selectedDataUrl="", lastAnalysis=null, stream=null, liveTimer=null, liveBusy=false;
+          <p class="muted">
+            JPG, PNG or WEBP · image is automatically resized for faster analysis
+          </p>
 
-function go(id){
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  $("#"+id).classList.add("active");
-  document.querySelectorAll(".navlinks button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
-  window.scrollTo({top:0,behavior:"smooth"});
-  if(id==="history") renderHistory();
-}
-document.querySelectorAll(".navlinks button").forEach(b=>b.onclick=()=>go(b.dataset.view));
+          <div class="toolbar" style="justify-content:center">
 
-function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+            <label class="primary file-button">
+              📁 Choose Image
+              <input
+                id="fileInput"
+                type="file"
+                accept="image/*"
+              />
+            </label>
 
-$("#fileInput").addEventListener("change",e=>{
-  const f=e.target.files?.[0]; if(!f)return;
-  if(f.size>8*1024*1024){toast("Please choose an image under 8 MB.");return}
-  const r=new FileReader();r.onload=()=>{selectedDataUrl=r.result;$("#preview").src=selectedDataUrl;$("#previewArea").classList.remove("hidden");$("#uploadBox").classList.add("hidden");$("#resultPanel").classList.add("hidden")};r.readAsDataURL(f);
-});
-$("#resetBtn").onclick=()=>{selectedDataUrl="";$("#fileInput").value="";$("#previewArea").classList.add("hidden");$("#uploadBox").classList.remove("hidden");$("#resultPanel").classList.add("hidden")};
+            <label class="secondary file-button">
+              📷 Take Photo
+              <input
+                id="cameraInput"
+                type="file"
+                accept="image/*"
+                capture="environment"
+              />
+            </label>
 
-async function analyze(dataUrl, live=false){
-  if(!dataUrl)return;
-  if(!live){$("#loading").classList.remove("hidden");$("#loadingText").textContent="Sending image to the vision model…";$("#analyzeBtn").disabled=true}
-  try{
-    const res=await fetch("/api/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:dataUrl})});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error||"Analysis failed");
-    lastAnalysis=data.analysis;
-    if(live){updateLive(data.analysis);$("#moreLive").disabled=false}else{renderResult(data.analysis);saveHistory(data.analysis,dataUrl)}
-  }catch(e){
-    if(live){$("#liveStatus").textContent="Live analysis error: "+e.message}else{toast(e.message)}
-  }finally{
-    if(!live){$("#loading").classList.add("hidden");$("#analyzeBtn").disabled=false}
-  }
-}
-$("#analyzeBtn").onclick=()=>analyze(selectedDataUrl);
+          </div>
 
-function renderResult(a){
-  const conf=Math.max(0,Math.min(100,Number(a.confidence)||0));
-  $("#resultPanel").innerHTML=`
-    <div class="result-head"><div><span class="eyebrow">AI CLASSIFICATION</span><div class="detected">${esc(a.primary_identification||"Not confidently identified")}</div><div class="status">${esc(a.category||"Unknown category")}</div></div><div class="confidence">${conf}%</div></div>
-    <div class="progress"><i style="width:${conf}%;animation:none"></i></div>
-    <div class="grid">
-      ${card("What is it?",a.primary_identification)}
-      ${card("Category",a.category)}
-      ${card("Visual description",a.description,"wide")}
-      ${card("Why this identification?",a.visual_evidence,"wide")}
-      ${card("Visible characteristics",a.visible_characteristics?.join(" · "))}
-      ${card("Scene / context",a.scene_context)}
-      ${card("Visible text",a.visible_text||"No clear text detected")}
-      ${card("Uses / purpose",a.uses_or_purpose)}
-      ${a.food.is_food?card("Food status",a.food.edibility_status):""}
-      ${a.food.is_food?card("Nutrition",a.food.nutrition_estimate,"wide"):""}
-      ${a.food.is_food?card("Food benefits",a.food.benefits):""}
-      ${a.food.is_food?card("Food limitations / safety",a.food.safety):""}
-      ${card("Safety & uncertainty",a.safety_and_uncertainty,"wide")}
-      ${card("Other possibilities",a.alternatives?.join(" · "),"wide")}
-    </div>
-    <div class="actions"><button class="btn primary" onclick="deepExplain()">Deep Analysis ↗</button><button class="btn" onclick="go('analyze')">Scan another</button></div>
-    <div id="deepBox" class="hidden" style="margin-top:18px"></div>`;
-  $("#resultPanel").classList.remove("hidden");
-}
-function card(k,v,w=""){if(!v)return"";return `<div class="info ${w}"><small>${esc(k)}</small><div>${Array.isArray(v)?v.map(x=>esc(x)).join(" · "):esc(v)}</div></div>`}
-function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+        </div>
 
-function deepExplain(){
-  const box=$("#deepBox");box.classList.remove("hidden");box.innerHTML=`<div class="info wide"><small>DEEP ANALYSIS</small><div>${esc(lastAnalysis?.final_summary||"The image was analyzed using visible evidence. See the structured fields above for the detailed result.")}</div></div>`;
-}
+        <img
+          id="preview"
+          class="preview hidden"
+          alt="Selected image preview"
+        />
 
-function saveHistory(a,img){
-  const h=JSON.parse(localStorage.getItem("imagifyHistory")||"[]");
-  h.unshift({name:a.primary_identification,confidence:a.confidence,image:img,date:new Date().toLocaleString()});
-  localStorage.setItem("imagifyHistory",JSON.stringify(h.slice(0,25)));
-}
-function renderHistory(){
-  const h=JSON.parse(localStorage.getItem("imagifyHistory")||"[]"), box=$("#historyList");
-  if(!h.length){box.innerHTML=`<div class="info"><div>No scans yet. Your analyzed images will appear here.</div></div>`;return}
-  box.innerHTML=h.map((x,i)=>`<div class="history-item"><img src="${x.image}" alt=""><main><b>${esc(x.name)}</b><p>${x.confidence}% confidence · ${esc(x.date)}</p></main><button class="btn" onclick="removeHistory(${i})">×</button></div>`).join("");
-}
-function removeHistory(i){const h=JSON.parse(localStorage.getItem("imagifyHistory")||"[]");h.splice(i,1);localStorage.setItem("imagifyHistory",JSON.stringify(h));renderHistory()}
-$("#clearHistory").onclick=()=>{localStorage.removeItem("imagifyHistory");renderHistory()};
+        <!-- QUICK CLASSIFICATION -->
 
-async function startCamera(){
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
-    $("#video").srcObject=stream;$("#liveStatus").textContent="Live camera active. Sampling a frame for analysis…";
-    $("#startLive").disabled=true;$("#stopLive").disabled=false;
-    liveTimer=setInterval(async()=>{if(liveBusy||!stream)return;liveBusy=true;try{const c=document.createElement("canvas"),v=$("#video");c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext("2d").drawImage(v,0,0,c.width,c.height);await analyze(c.toDataURL("image/jpeg",.78),true)}finally{liveBusy=false}},6500);
-  }catch(e){toast("Camera permission was not granted or is unavailable.")}
-}
-function stopCamera(){if(liveTimer)clearInterval(liveTimer);liveTimer=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$("#video").srcObject=null;$("#startLive").disabled=false;$("#liveStatus").textContent="Camera stopped."}
-$("#startLive").onclick=startCamera;$("#stopLive").onclick=stopCamera;$("#moreLive").disabled=true;
-function updateLive(a){$("#liveName").textContent=a.primary_identification||"Unknown";$("#liveConfidence").textContent=`${a.confidence||0}% · ${a.category||"visual match"}`;$("#liveStatus").textContent="Latest frame analyzed. Move the camera or tap More Information."}
-$("#moreLive").onclick=()=>{if(!lastAnalysis){toast("Analyze a frame first.");return}go("analyze");renderResult(lastAnalysis)};
+        <div
+          id="quickResult"
+          class="panel hidden"
+          style="margin-top:16px"
+        ></div>
 
-renderHistory();
-</script>
+        <!-- PROGRESS -->
+
+        <div
+          id="analyzeProgress"
+          class="progress-wrap hidden"
+        >
+
+          <div class="progress-bar">
+            <i></i>
+          </div>
+
+          <div
+            id="progressText"
+            class="status-text"
+          >
+            Preparing image...
+          </div>
+
+        </div>
+
+        <!-- CONTROLS -->
+
+        <div class="toolbar">
+
+          <button
+            id="deepBtn"
+            class="primary hidden"
+          >
+            ✨ Get Full AI Analysis
+          </button>
+
+          <button
+            id="clearBtn"
+            class="secondary hidden"
+          >
+            Clear
+          </button>
+
+        </div>
+
+        <!-- RESULT -->
+
+        <div
+          id="result"
+          class="hidden"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         LIVE CAMERA
+    ========================== -->
+
+    <section id="live" class="screen">
+
+      <div class="section-title">
+        <h2>Live Camera Scan</h2>
+        <p>
+          Point your camera at an object. Fast recognition happens locally,
+          while detailed AI analysis starts when you request it.
+        </p>
+      </div>
+
+      <div class="live-layout">
+
+        <div class="camera-box">
+
+          <video
+            id="video"
+            autoplay
+            playsinline
+            muted
+          ></video>
+
+          <div class="reticle"></div>
+
+          <div class="camera-hud">
+
+            <div>
+
+              <div
+                id="liveLabel"
+                class="live-label"
+              >
+                Camera ready
+              </div>
+
+              <div
+                id="liveStatus"
+                class="live-status"
+              >
+                Start the camera to begin.
+              </div>
+
+            </div>
+
+            <span
+              id="liveConfidence"
+              class="badge"
+            >
+              —
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <h3>Live controls</h3>
+
+          <p class="muted">
+            The quick classifier runs directly in your browser, so the live
+            label does not wait for the internet.
+          </p>
+
+          <div class="toolbar">
+
+            <button
+              id="startCam"
+              class="primary"
+            >
+              ▶ Start Camera
+            </button>
+
+            <button
+              id="stopCam"
+              class="secondary"
+            >
+              ■ Stop
+            </button>
+
+          </div>
+
+          <button
+            id="liveMore"
+            class="primary"
+            style="width:100%;margin-top:10px"
+            disabled
+          >
+            🔎 Know More
+          </button>
+
+          <div style="height:15px"></div>
+
+          <div class="info-box">
+
+            <h4>How live mode works</h4>
+
+            <p>
+              Live mode uses a lightweight browser model for quick recognition.
+              Tap “Know More” when you want the current camera frame to receive
+              a detailed AI explanation.
+            </p>
+
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="info-box">
+
+            <h4>Best results</h4>
+
+            <p>
+              Keep the object visible, use good lighting and hold the camera
+              reasonably steady.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         HISTORY
+    ========================== -->
+
+    <section id="history" class="screen">
+
+      <div class="section-title">
+        <h2>Scan History</h2>
+        <p>
+          Previous detailed analyses are stored only in this browser.
+        </p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <button
+            id="clearHistory"
+            class="danger"
+          >
+            Clear History
+          </button>
+
+        </div>
+
+        <div id="historyList"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         ABOUT
+    ========================== -->
+
+    <section id="about" class="screen">
+
+      <div class="section-title">
+        <h2>About Imagify</h2>
+        <p>
+          A Class XII Artificial Intelligence project demonstrating computer
+          vision and AI-powered visual information extraction.
+        </p>
+      </div>
+
+      <div class="about-grid">
+
+        <div class="info-box">
+          <h4>Project</h4>
+          <p>Imagify — AI Image Intelligence</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Subject</h4>
+          <p>Artificial Intelligence</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Class</h4>
+          <p>XII</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Technology</h4>
+          <p>Computer Vision + AI + Web Technologies</p>
+        </div>
+
+        <div class="info-box">
+          <h4>Objective</h4>
+          <p>
+            To classify visible objects and provide useful, structured
+            information about them using AI.
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>AI Workflow</h4>
+          <p>
+            Image → preprocessing → visual recognition → structured analysis
+            → user-friendly result.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="section-title">
+        <h2>Important limitation</h2>
+        <p>
+          AI can analyze visible evidence, but an image cannot guarantee
+          hidden properties such as exact ingredients, freshness, contamination,
+          allergens or exact nutritional values.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+    Made for a Class XII Artificial Intelligence project ·
+    Imagify · AI-generated results may vary with image quality.
+  </footer>
+
+
+  <div
+    id="toast"
+    class="toast hidden"
+  ></div>
+
+
+  <!-- TensorFlow.js -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js">
+  </script>
+
+  <!-- MobileNet -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js">
+  </script>
+
+
+  <script>
+    /* ============================================================
+       IMAGIFY APPLICATION
+    ============================================================ */
+
+    const $ = (selector) => document.querySelector(selector);
+
+    let model = null;
+    let selectedDataUrl = "";
+    let lastQuick = [];
+    let lastAnalysis = null;
+
+    let cameraStream = null;
+    let liveTimer = null;
+    let liveBusy = false;
+
+
+    /* ============================================================
+       BASIC HELPERS
+    ============================================================ */
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(
+        /[&<>"']/g,
+        (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[char]
+      );
+    }
+
+
+    function showToast(message) {
+      const toast = $("#toast");
+
+      toast.textContent = message;
+      toast.classList.remove("hidden");
+
+      clearTimeout(showToast.timer);
+
+      showToast.timer = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 3500);
+    }
+
+
+    /* ============================================================
+       SCREEN NAVIGATION
+    ============================================================ */
+
+    function showScreen(screenId) {
+
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle(
+          "active",
+          screen.id === screenId
+        );
+      });
+
+      document.querySelectorAll(".nav-btn").forEach((button) => {
+        button.classList.toggle(
+          "active",
+          button.dataset.screen === screenId
+        );
+      });
+
+      if (screenId === "history") {
+        renderHistory();
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+
+    document.querySelectorAll(".nav-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        showScreen(button.dataset.screen);
+      });
+    });
+
+
+    /* ============================================================
+       LOAD FAST LOCAL CLASSIFIER
+    ============================================================ */
+
+    async function loadModel() {
+
+      if (model) {
+        return model;
+      }
+
+      try {
+
+        model = await mobilenet.load({
+          version: 2,
+          alpha: 1.0
+        });
+
+        return model;
+
+      } catch (error) {
+
+        console.error("MobileNet loading error:", error);
+
+        throw new Error(
+          "The quick classifier could not load. Check your internet connection."
+        );
+      }
+    }
+
+
+    /* ============================================================
+       IMAGE COMPRESSION
+    ============================================================ */
+
+    function imageToDataURL(
+      source,
+      maxDimension = 1280,
+      quality = 0.76
+    ) {
+
+      const width =
+        source.videoWidth ||
+        source.naturalWidth ||
+        source.width;
+
+      const height =
+        source.videoHeight ||
+        source.naturalHeight ||
+        source.height;
+
+      if (!width || !height) {
+        throw new Error("The image could not be read.");
+      }
+
+      const scale = Math.min(
+        1,
+        maxDimension / Math.max(width, height)
+      );
+
+      const canvas = document.createElement("canvas");
+
+      canvas.width = Math.max(
+        1,
+        Math.round(width * scale)
+      );
+
+      canvas.height = Math.max(
+        1,
+        Math.round(height * scale)
+      );
+
+      const context = canvas.getContext("2d", {
+        alpha: false
+      });
+
+      context.drawImage(
+        source,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      return canvas.toDataURL(
+        "image/jpeg",
+        quality
+      );
+    }
+
+
+    function fileToDataURL(file) {
+
+      return new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+
+        reader.onerror = () => {
+          reject(
+            new Error("Could not read the image.")
+          );
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
+
+    /* ============================================================
+       QUICK LOCAL CLASSIFICATION
+    ============================================================ */
+
+    async function quickClassify(source) {
+
+      try {
+
+        const classifier = await loadModel();
+
+        const predictions =
+          await classifier.classify(
+            source,
+            3
+          );
+
+        lastQuick = predictions;
+
+        return predictions;
+
+      } catch (error) {
+
+        console.error(
+          "Quick classification error:",
+          error
+        );
+
+        return [];
+      }
+    }
+
+
+    function renderQuickResult(predictions) {
+
+      const container = $("#quickResult");
+
+      if (!predictions || !predictions.length) {
+
+        container.classList.add("hidden");
+
+        return;
+      }
+
+      const mainPrediction = predictions[0];
+
+      container.innerHTML = `
+
+        <div class="result-header">
+
+          <div>
+
+            <div class="eyebrow">
+              FAST LOCAL CLASSIFICATION
+            </div>
+
+            <h2>
+              ${escapeHTML(mainPrediction.className)}
+            </h2>
+
+            <p class="muted">
+              Instant browser-side recognition.
+              No server request was required for this result.
+            </p>
+
+          </div>
+
+          <span class="badge">
+            ${Math.round(
+              mainPrediction.probability * 100
+            )}%
+          </span>
+
+        </div>
+
+        <div
+          class="characteristics"
+          style="margin-top:13px"
+        >
+
+          ${predictions.map((prediction) => `
+            <span class="chip">
+              ${escapeHTML(prediction.className)}
+              ·
+              ${Math.round(
+                prediction.probability * 100
+              )}%
+            </span>
+          `).join("")}
+
+        </div>
+
+      `;
+
+      container.classList.remove("hidden");
+    }
+
+
+    /* ============================================================
+       PREPARE SELECTED IMAGE
+    ============================================================ */
+
+    async function prepareImage(file) {
+
+      if (!file) {
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+
+        showToast(
+          "Please select a valid image."
+        );
+
+        return;
+      }
+
+      try {
+
+        const originalData =
+          await fileToDataURL(file);
+
+        const image =
+          new Image();
+
+        image.src = originalData;
+
+        await image.decode();
+
+        /*
+          Resize before sending anything to the API.
+          This significantly reduces request size.
+        */
+
+        selectedDataUrl =
+          imageToDataURL(
+            image,
+            1280,
+            0.76
+          );
+
+        $("#preview").src =
+          selectedDataUrl;
+
+        $("#preview").classList.remove(
+          "hidden"
+        );
+
+        $("#deepBtn").classList.remove(
+          "hidden"
+        );
+
+        $("#clearBtn").classList.remove(
+          "hidden"
+        );
+
+        $("#result").classList.add(
+          "hidden"
+        );
+
+        /*
+          Quick local classification.
+        */
+
+        const predictions =
+          await quickClassify(image);
+
+        renderQuickResult(
+          predictions
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        showToast(
+          error.message ||
+          "Could not prepare the image."
+        );
+      }
+    }
+
+
+    $("#fileInput").addEventListener(
+      "change",
+      (event) => {
+
+        const file =
+          event.target.files[0];
+
+        prepareImage(file);
+      }
+    );
+
+
+    $("#cameraInput").addEventListener(
+      "change",
+      (event) => {
+
+        const file =
+          event.target.files[0];
+
+        prepareImage(file);
+      }
+    );
+
+
+    /* ============================================================
+       CLEAR CURRENT IMAGE
+    ============================================================ */
+
+    $("#clearBtn").addEventListener(
+      "click",
+      () => {
+
+        selectedDataUrl = "";
+        lastQuick = [];
+        lastAnalysis = null;
+
+        $("#preview").classList.add(
+          "hidden"
+        );
+
+        $("#quickResult").classList.add(
+          "hidden"
+        );
+
+        $("#deepBtn").classList.add(
+          "hidden"
+        );
+
+        $("#clearBtn").classList.add(
+          "hidden"
+        );
+
+        $("#result").classList.add(
+          "hidden"
+        );
+
+        $("#fileInput").value = "";
+        $("#cameraInput").value = "";
+      }
+    );
+
+
+    /* ============================================================
+       INFO BOX HELPER
+    ============================================================ */
+
+    function infoBox(title, value) {
+
+      return `
+
+        <div class="info-box">
+
+          <h4>
+            ${escapeHTML(title)}
+          </h4>
+
+          <p>
+            ${escapeHTML(
+              value ||
+              "Not available from the image."
+            )}
+          </p>
+
+        </div>
+
+      `;
+    }
+
+
+    /* ============================================================
+       RENDER FULL AI ANALYSIS
+    ============================================================ */
+
+    function renderAnalysis(analysis) {
+
+      if (!analysis) {
+        return;
+      }
+
+      const food =
+        analysis.food || {};
+
+      const characteristics =
+        Array.isArray(
+          analysis.visible_characteristics
+        )
+          ? analysis.visible_characteristics
+          : [];
+
+      const alternatives =
+        Array.isArray(
+          analysis.alternatives
+        )
+          ? analysis.alternatives
+          : [];
+
+      $("#result").innerHTML = `
+
+        <div class="result-header">
+
+          <div>
+
+            <div class="eyebrow">
+              AI IMAGE ANALYSIS
+            </div>
+
+            <h2>
+              ${escapeHTML(
+                analysis.primary_identification ||
+                "Unknown subject"
+              )}
+            </h2>
+
+            <p class="muted">
+              ${escapeHTML(
+                analysis.final_summary ||
+                analysis.description ||
+                ""
+              )}
+            </p>
+
+          </div>
+
+          <span class="badge">
+            ${Number(
+              analysis.confidence || 0
+            )}% confidence
+          </span>
+
+        </div>
+
+
+        <div class="result-grid">
+
+          ${infoBox(
+            "Category",
+            analysis.category
+          )}
+
+          ${infoBox(
+            "What the AI sees",
+            analysis.description
+          )}
+
+          ${infoBox(
+            "Visual evidence",
+            analysis.visual_evidence
+          )}
+
+          ${infoBox(
+            "Visible characteristics",
+            characteristics.length
+              ? characteristics.join(" · ")
+              : "No distinctive characteristics returned."
+          )}
+
+          ${infoBox(
+            "Scene / context",
+            analysis.scene_context
+          )}
+
+          ${infoBox(
+            "Visible text",
+            analysis.visible_text ||
+            "No readable text detected."
+          )}
+
+          ${infoBox(
+            "Uses / purpose",
+            analysis.uses_or_purpose
+          )}
+
+          ${infoBox(
+            "Safety & uncertainty",
+            analysis.safety_and_uncertainty
+          )}
+
+        </div>
+
+
+        ${
+          characteristics.length
+            ? `
+              <div
+                class="info-box"
+                style="margin-top:14px"
+              >
+
+                <h4>
+                  Key characteristics
+                </h4>
+
+                <div class="characteristics">
+
+                  ${characteristics.map(
+                    (item) => `
+                      <span class="chip">
+                        ${escapeHTML(item)}
+                      </span>
+                    `
+                  ).join("")}
+
+                </div>
+
+              </div>
+            `
+            : ""
+        }
+
+
+        <!-- FOOD SECTION -->
+
+        <div class="panel food-panel">
+
+          <div class="food-head">
+
+            <div>
+
+              <h3 style="margin:0">
+                🍎 Food & Nutrition
+              </h3>
+
+              <p
+                class="muted"
+                style="margin:4px 0 0"
+              >
+                This section appears when the image
+                is identified as food.
+              </p>
+
+            </div>
+
+            <span class="badge">
+
+              ${
+                food.is_food
+                  ? "Food detected"
+                  : "Not identified as food"
+              }
+
+            </span>
+
+          </div>
+
+
+          ${
+            food.is_food
+
+              ? `
+
+                <div class="result-grid">
+
+                  ${infoBox(
+                    "Edibility status",
+                    food.edibility_status
+                  )}
+
+                  ${infoBox(
+                    "Approximate nutrition",
+                    food.nutrition_estimate
+                  )}
+
+                  ${infoBox(
+                    "General benefits",
+                    food.benefits
+                  )}
+
+                  ${infoBox(
+                    "Food safety",
+                    food.safety
+                  )}
+
+                </div>
+
+              `
+
+              : `
+
+                <p
+                  class="muted"
+                  style="margin-top:14px"
+                >
+                  Nutrition information is not applicable
+                  to this result.
+                </p>
+
+              `
+          }
+
+        </div>
+
+
+        <!-- SIMILAR POSSIBILITIES -->
+
+        <div
+          class="info-box"
+          style="margin-top:14px"
+        >
+
+          <h4>
+            Similar possibilities
+          </h4>
+
+          <p>
+
+            ${
+              alternatives.length
+                ? alternatives
+                    .map(escapeHTML)
+                    .join(" · ")
+                : "None returned."
+            }
+
+          </p>
+
+        </div>
+
+
+        <!-- FINAL INSIGHT -->
+
+        <div
+          class="panel"
+          style="margin-top:14px"
+        >
+
+          <div class="eyebrow">
+            FINAL AI INSIGHT
+          </div>
+
+          <h3>
+            ${
+              escapeHTML(
+                analysis.primary_identification ||
+                "Analysis"
+              )
+            }
+          </h3>
+
+          <p class="muted">
+            ${
+              escapeHTML(
+                analysis.final_summary ||
+                analysis.description ||
+                "No additional summary was returned."
+              )
+            }
+          </p>
+
+        </div>
+
+      `;
+
+      $("#result").classList.remove(
+        "hidden"
+      );
+    }
+
+
+    /* ============================================================
+       FULL AI ANALYSIS
+    ============================================================ */
+
+    async function deepAnalyze(
+      dataUrl = selectedDataUrl
+    ) {
+
+      if (!dataUrl) {
+
+        showToast(
+          "Choose or capture an image first."
+        );
+
+        return;
+      }
+
+      const progress =
+        $("#analyzeProgress");
+
+      const progressText =
+        $("#progressText");
+
+      const deepButton =
+        $("#deepBtn");
+
+      progress.classList.remove(
+        "hidden"
+      );
+
+      deepButton.disabled = true;
+
+      progressText.textContent =
+        "Sending the compressed image to Imagify AI...";
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/analyze",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                image: dataUrl
+              })
+            }
+          );
+
+
+        const data =
+          await response.json()
+            .catch(() => ({}));
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.error ||
+            "AI analysis failed."
+          );
+        }
+
+
+        if (!data.analysis) {
+
+          throw new Error(
+            "The AI did not return a valid analysis."
+          );
+        }
+
+
+        progressText.textContent =
+          "Analysis complete.";
+
+        lastAnalysis =
+          data.analysis;
+
+        renderAnalysis(
+          lastAnalysis
+        );
+
+        saveHistory(
+          lastAnalysis
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Detailed analysis error:",
+          error
+        );
+
+        showToast(
+          error.message ||
+          "AI analysis failed. Please try again."
+        );
+
+      } finally {
+
+        setTimeout(() => {
+          progress.classList.add(
+            "hidden"
+          );
+        }, 400);
+
+        deepButton.disabled = false;
+      }
+    }
+
+
+    $("#deepBtn").addEventListener(
+      "click",
+      () => {
+        deepAnalyze();
+      }
+    );
+
+
+    /* ============================================================
+       LIVE CAMERA
+    ============================================================ */
+
+    async function startCamera() {
+
+      if (cameraStream) {
+        return;
+      }
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
+
+        showToast(
+          "Camera access is not supported by this browser."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        cameraStream =
+          await navigator.mediaDevices.getUserMedia(
+            {
+              video: {
+                facingMode: {
+                  ideal: "environment"
+                },
+
+                width: {
+                  ideal: 1280
+                },
+
+                height: {
+                  ideal: 720
+                }
+              },
+
+              audio: false
+            }
+          );
+
+
+        const video =
+          $("#video");
+
+        video.srcObject =
+          cameraStream;
+
+        await video.play();
+
+
+        $("#startCam").disabled =
+          true;
+
+        $("#liveStatus").innerHTML =
+          '<span class="pulse-dot"></span>Starting local recognition...';
+
+
+        /*
+          Load the local model only once.
+        */
+
+        await loadModel();
+
+
+        $("#liveStatus").innerHTML =
+          '<span class="pulse-dot"></span>Live local recognition active';
+
+
+        /*
+          Analyze the current camera frame
+          approximately once per second.
+
+          This happens LOCALLY in the browser.
+          It does NOT call the server/API.
+        */
+
+        liveTimer =
+          setInterval(
+            liveClassify,
+            900
+          );
+
+
+      } catch (error) {
+
+        console.error(
+          "Camera error:",
+          error
+        );
+
+        cameraStream = null;
+
+        showToast(
+          "Camera could not start. Allow camera permission and use the HTTPS Vercel link."
+        );
+      }
+    }
+
+
+    async function liveClassify() {
+
+      if (
+        !cameraStream ||
+        liveBusy ||
+        !model
+      ) {
+        return;
+      }
+
+
+      const video =
+        $("#video");
+
+
+      if (
+        video.readyState <
+        HTMLMediaElement.HAVE_CURRENT_DATA
+      ) {
+        return;
+      }
+
+
+      liveBusy = true;
+
+
+      try {
+
+        const predictions =
+          await model.classify(
+            video,
+            3
+          );
+
+
+        lastQuick =
+          predictions;
+
+
+        const main =
+          predictions[0];
+
+
+        if (main) {
+
+          $("#liveLabel").textContent =
+            main.className;
+
+          $("#liveConfidence").textContent =
+            Math.round(
+              main.probability * 100
+            ) + "%";
+
+          $("#liveStatus").innerHTML =
+            '<span class="pulse-dot"></span>Live local recognition';
+
+          $("#liveMore").disabled =
+            false;
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "Live classification error:",
+          error
+        );
+
+      } finally {
+
+        liveBusy = false;
+      }
+    }
+
+
+    function stopCamera() {
+
+      clearInterval(
+        liveTimer
+      );
+
+      liveTimer = null;
+
+
+      if (cameraStream) {
+
+        cameraStream
+          .getTracks()
+          .forEach(
+            (track) => track.stop()
+          );
+
+        cameraStream = null;
+      }
+
+
+      $("#video").srcObject =
+        null;
+
+      $("#startCam").disabled =
+        false;
+
+      $("#liveMore").disabled =
+        true;
+
+      $("#liveLabel").textContent =
+        "Camera ready";
+
+      $("#liveConfidence").textContent =
+        "—";
+
+      $("#liveStatus").textContent =
+        "Start the camera to begin.";
+    }
+
+
+    $("#startCam").addEventListener(
+      "click",
+      startCamera
+    );
+
+
+    $("#stopCam").addEventListener(
+      "click",
+      stopCamera
+    );
+
+
+    /* ============================================================
+       LIVE CAMERA → DETAILED AI
+    ============================================================ */
+
+    $("#liveMore").addEventListener(
+      "click",
+      async () => {
+
+        if (!cameraStream) {
+
+          showToast(
+            "Start the camera first."
+          );
+
+          return;
+        }
+
+
+        const video =
+          $("#video");
+
+
+        try {
+
+          /*
+            Capture ONLY the current frame.
+
+            Compress it before sending.
+          */
+
+          const captured =
+            imageToDataURL(
+              video,
+              1280,
+              0.72
+            );
+
+
+          selectedDataUrl =
+            captured;
+
+
+          $("#preview").src =
+            captured;
+
+          $("#preview").classList.remove(
+            "hidden"
+          );
+
+          $("#deepBtn").classList.remove(
+            "hidden"
+          );
+
+          $("#clearBtn").classList.remove(
+            "hidden"
+          );
+
+
+          renderQuickResult(
+            lastQuick
+          );
+
+
+          showScreen(
+            "analyze"
+          );
+
+
+          await deepAnalyze(
+            captured
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Live capture error:",
+            error
+          );
+
+          showToast(
+            "Could not capture the camera frame."
+          );
+        }
+      }
+    );
+
+
+    /* ============================================================
+       HISTORY
+    ============================================================ */
+
+    function getHistory() {
+
+      try {
+
+        return JSON.parse(
+          localStorage.getItem(
+            "imagifyHistory"
+          ) || "[]"
+        );
+
+      } catch {
+
+        return [];
+      }
+    }
+
+
+    function saveHistory(analysis) {
+
+      const history =
+        getHistory();
+
+
+      const item = {
+
+        id: Date.now(),
+
+        name:
+          analysis.primary_identification ||
+          "Unknown subject",
+
+        confidence:
+          Number(
+            analysis.confidence || 0
+          ),
+
+        date:
+          new Date().toLocaleString(),
+
+        summary:
+          analysis.final_summary ||
+          analysis.description ||
+          ""
+
+      };
+
+
+      history.unshift(
+        item
+      );
+
+
+      /*
+        Keep the newest 20 scans.
+      */
+
+      localStorage.setItem(
+        "imagifyHistory",
+        JSON.stringify(
+          history.slice(0, 20)
+        )
+      );
+
+
+      renderHistory();
+    }
+
+
+    function renderHistory() {
+
+      const list =
+        $("#historyList");
+
+      const history =
+        getHistory();
+
+
+      if (!history.length) {
+
+        list.innerHTML = `
+          <p class="muted">
+            No detailed scans yet.
+          </p>
+        `;
+
+        return;
+      }
+
+
+      list.innerHTML =
+        history
+          .map(
+            (item) => `
+
+              <div class="history-item">
+
+                <div>
+
+                  <div class="history-name">
+                    ${escapeHTML(
+                      item.name
+                    )}
+                  </div>
+
+                  <div class="history-meta">
+                    ${escapeHTML(
+                      item.date
+                    )}
+                    ·
+                    ${escapeHTML(
+                      item.summary
+                    )}
+                  </div>
+
+                </div>
+
+                <span class="badge">
+                  ${Number(
+                    item.confidence || 0
+                  )}%
+                </span>
+
+              </div>
+
+            `
+          )
+          .join("");
+    }
+
+
+    $("#clearHistory").addEventListener(
+      "click",
+      () => {
+
+        localStorage.removeItem(
+          "imagifyHistory"
+        );
+
+        renderHistory();
+
+        showToast(
+          "Scan history cleared."
+        );
+      }
+    );
+
+
+    /* ============================================================
+       CLEANUP
+    ============================================================ */
+
+    window.addEventListener(
+      "beforeunload",
+      () => {
+        stopCamera();
+      }
+    );
+
+
+    /* ============================================================
+       INITIALIZATION
+    ============================================================ */
+
+    renderHistory();
+
+
+    /*
+      Load the local model in the background.
+
+      The website can still open while it loads.
+    */
+
+    loadModel().catch(
+      (error) => {
+        console.error(error);
+      }
+    );
+
+  </script>
+
 </body>
 </html>
