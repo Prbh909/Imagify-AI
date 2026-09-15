@@ -1,398 +1,286 @@
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-const MODEL =
-  process.env.IMAGIFY_MODEL || "gpt-5.6-luna";
-
 export default async function handler(req, res) {
+  // CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  /*
-   * Allow browser preflight requests.
-   */
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  /*
-   * Only POST is allowed.
-   */
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: "Method not allowed. Use POST."
+      error: "Method not allowed."
     });
   }
 
-  /*
-   * Check API key.
-   */
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
     return res.status(500).json({
-      error:
-        "OPENAI_API_KEY is missing in Vercel. Add it in Project Settings → Environment Variables, then redeploy."
+      error: "OPENAI_API_KEY is missing from Vercel Environment Variables."
     });
   }
 
   try {
+    let body = req.body;
 
-    const body = req.body || {};
-    const image = body.image;
+    // Vercel can provide req.body as either an object or a string.
+    if (typeof body === "string") {
+      body = JSON.parse(body);
+    }
 
-    /*
-     * Validate image.
-     */
-    if (
-      typeof image !== "string" ||
-      !image.startsWith("data:image/")
-    ) {
+    const image = body?.image;
+
+    if (!image || typeof image !== "string") {
       return res.status(400).json({
-        error:
-          "Invalid image data. Please upload or capture an image again."
+        error: "No image was received by the AI server."
       });
     }
 
-    /*
-     * Prevent extremely large requests.
-     */
-    if (image.length > 9_000_000) {
+    if (!image.startsWith("data:image/")) {
+      return res.status(400).json({
+        error: "Invalid image format. Please upload a JPG or PNG image."
+      });
+    }
+
+    if (image.length > 10_000_000) {
       return res.status(413).json({
-        error:
-          "Image is too large. Please use a smaller image."
+        error: "Image is too large. Please choose a smaller image."
       });
     }
 
-    /*
-     * Ask the vision model for structured information.
-     */
-    const response = await client.responses.create({
+    const prompt = `
+You are the computer-vision AI inside a Class 12 school project called Imagify.
 
-      model: MODEL,
+Analyze the ACTUAL IMAGE provided to you.
 
-      store: false,
+Identify the main visible subject as accurately as possible.
 
-      input: [
-        {
-          role: "user",
+Return useful information based ONLY on what can reasonably be determined from the image.
 
-          content: [
+The result must be suitable for displaying in an organized school-project interface.
 
+Rules:
+- Identify the main object, subject, animal, plant, food, device, scene, etc.
+- Give a confidence score from 0 to 100.
+- Explain the visible clues supporting the identification.
+- Describe important visible characteristics.
+- Mention readable text if present.
+- Mention likely purpose or use when reasonably identifiable.
+- If it is food, give APPROXIMATE nutrition information and general benefits.
+- Never claim exact calories, ingredients, freshness, contamination, allergies or food safety from an image alone.
+- If something cannot be determined, clearly say that.
+- Do not invent information.
+- Keep the answer concise but informative.
+- Do not return one huge paragraph.
+
+Return ONLY valid JSON.
+`;
+
+    const openAIResponse = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-5.6-luna",
+          store: false,
+          input: [
             {
-              type: "input_text",
-
-              text: `
-You are the AI vision engine for a Class XII Artificial Intelligence
-school project called Imagify.
-
-Analyze the supplied image carefully.
-
-Your job is to identify what is visibly present and provide useful,
-accurate and concise information.
-
-IMPORTANT RULES:
-
-1. Base conclusions on visible evidence.
-2. Do not invent hidden information.
-3. If identification is uncertain, say so.
-4. Give a confidence score from 0 to 100.
-5. Explain the visual clues supporting the identification.
-6. Mention important visible characteristics.
-7. Mention other clearly visible objects when useful.
-8. Transcribe readable visible text if present.
-9. Explain likely purpose or use when reasonably identifiable.
-10. If the image contains food, provide approximate nutrition information.
-11. Nutrition values must be clearly described as estimates.
-12. Do not claim exact calories, ingredients, freshness, contamination,
-    allergen status or food safety from pixels alone.
-13. Distinguish "appears to be food" from "guaranteed safe to eat".
-14. If it is not food, food-related fields should clearly say that they
-    are not applicable.
-15. Keep the final answer organized and useful for a student.
-16. Do not produce one huge paragraph.
-17. Never pretend certainty when the image does not support it.
-
-For food nutrition, use approximate values per 100 g only when a reasonable
-estimate is possible. If the image does not provide enough information,
-say that an accurate estimate cannot be determined from the image.
-
-Return ONLY the requested structured JSON.
-              `
-            },
-
-            {
-              type: "input_image",
-
-              image_url: image,
-
-              detail: "low"
-            }
-
-          ]
-        }
-      ],
-
-      text: {
-
-        format: {
-
-          type: "json_schema",
-
-          name: "imagify_analysis",
-
-          strict: true,
-
-          schema: {
-
-            type: "object",
-
-            additionalProperties: false,
-
-            properties: {
-
-              primary_identification: {
-                type: "string"
-              },
-
-              category: {
-                type: "string"
-              },
-
-              confidence: {
-                type: "number"
-              },
-
-              description: {
-                type: "string"
-              },
-
-              visual_evidence: {
-                type: "string"
-              },
-
-              visible_characteristics: {
-                type: "array",
-                items: {
-                  type: "string"
+              role: "user",
+              content: [
+                {
+                  type: "input_text",
+                  text: prompt
+                },
+                {
+                  type: "input_image",
+                  image_url: image,
+                  detail: "high"
                 }
-              },
-
-              scene_context: {
-                type: "string"
-              },
-
-              visible_text: {
-                type: "string"
-              },
-
-              uses_or_purpose: {
-                type: "string"
-              },
-
-              food: {
-
+              ]
+            }
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "imagify_result",
+              strict: true,
+              schema: {
                 type: "object",
-
                 additionalProperties: false,
-
                 properties: {
-
-                  is_food: {
-                    type: "boolean"
-                  },
-
-                  edibility_status: {
+                  primary_identification: {
                     type: "string"
                   },
-
-                  nutrition_estimate: {
+                  category: {
                     type: "string"
                   },
-
-                  benefits: {
+                  confidence: {
+                    type: "number"
+                  },
+                  description: {
                     type: "string"
                   },
-
-                  safety: {
+                  visual_evidence: {
+                    type: "string"
+                  },
+                  visible_characteristics: {
+                    type: "array",
+                    items: {
+                      type: "string"
+                    }
+                  },
+                  scene_context: {
+                    type: "string"
+                  },
+                  visible_text: {
+                    type: "string"
+                  },
+                  uses_or_purpose: {
+                    type: "string"
+                  },
+                  food: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: {
+                      is_food: {
+                        type: "boolean"
+                      },
+                      edibility_status: {
+                        type: "string"
+                      },
+                      nutrition_estimate: {
+                        type: "string"
+                      },
+                      benefits: {
+                        type: "string"
+                      },
+                      safety: {
+                        type: "string"
+                      }
+                    },
+                    required: [
+                      "is_food",
+                      "edibility_status",
+                      "nutrition_estimate",
+                      "benefits",
+                      "safety"
+                    ]
+                  },
+                  safety_and_uncertainty: {
+                    type: "string"
+                  },
+                  alternatives: {
+                    type: "array",
+                    items: {
+                      type: "string"
+                    }
+                  },
+                  final_summary: {
                     type: "string"
                   }
-
                 },
-
                 required: [
-                  "is_food",
-                  "edibility_status",
-                  "nutrition_estimate",
-                  "benefits",
-                  "safety"
+                  "primary_identification",
+                  "category",
+                  "confidence",
+                  "description",
+                  "visual_evidence",
+                  "visible_characteristics",
+                  "scene_context",
+                  "visible_text",
+                  "uses_or_purpose",
+                  "food",
+                  "safety_and_uncertainty",
+                  "alternatives",
+                  "final_summary"
                 ]
-              },
-
-              safety_and_uncertainty: {
-                type: "string"
-              },
-
-              alternatives: {
-                type: "array",
-                items: {
-                  type: "string"
-                }
-              },
-
-              final_summary: {
-                type: "string"
               }
-
-            },
-
-            required: [
-              "primary_identification",
-              "category",
-              "confidence",
-              "description",
-              "visual_evidence",
-              "visible_characteristics",
-              "scene_context",
-              "visible_text",
-              "uses_or_purpose",
-              "food",
-              "safety_and_uncertainty",
-              "alternatives",
-              "final_summary"
-            ]
+            }
           }
-        }
+        })
       }
-    });
+    );
 
+    const rawText = await openAIResponse.text();
 
-    /*
-     * Responses API gives the generated text here.
-     */
-    const outputText =
-      response.output_text;
+    if (!openAIResponse.ok) {
+      console.error("OpenAI HTTP error:", openAIResponse.status);
+      console.error(rawText);
 
+      let errorMessage = rawText;
 
-    if (!outputText) {
-      console.error(
-        "Empty OpenAI response:",
-        response
-      );
+      try {
+        const errorJSON = JSON.parse(rawText);
+        errorMessage =
+          errorJSON?.error?.message ||
+          errorJSON?.message ||
+          rawText;
+      } catch {}
 
-      return res.status(502).json({
-        error:
-          "The AI returned an empty response. Please try again."
+      return res.status(openAIResponse.status).json({
+        error: `OpenAI error: ${errorMessage}`
       });
     }
 
+    let responseData;
 
-    /*
-     * Parse structured JSON.
-     */
+    try {
+      responseData = JSON.parse(rawText);
+    } catch {
+      console.error("Invalid OpenAI response:", rawText);
+
+      return res.status(502).json({
+        error: "The AI server returned an invalid response."
+      });
+    }
+
+    const outputText = responseData.output_text;
+
+    if (!outputText) {
+      console.error("No output_text:", responseData);
+
+      return res.status(502).json({
+        error: "The AI returned no analysis."
+      });
+    }
+
     let analysis;
 
     try {
-
-      analysis =
-        JSON.parse(outputText);
-
-    } catch (parseError) {
-
-      console.error(
-        "JSON parsing error:",
-        parseError
-      );
-
-      console.error(
-        "Raw AI output:",
-        outputText
-      );
+      analysis = JSON.parse(outputText);
+    } catch {
+      console.error("AI JSON parsing failed:", outputText);
 
       return res.status(502).json({
-        error:
-          "The AI returned an invalid analysis format. Please try again."
+        error: "The AI returned an invalid analysis format."
       });
     }
 
-
-    /*
-     * Basic confidence cleanup.
-     */
-    if (
-      typeof analysis.confidence !== "number"
-    ) {
-      analysis.confidence = 0;
-    }
-
-    analysis.confidence =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            analysis.confidence
-          )
-        )
-      );
-
+    analysis.confidence = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(Number(analysis.confidence) || 0)
+      )
+    );
 
     return res.status(200).json({
       analysis
     });
 
-
   } catch (error) {
-
-    console.error(
-      "Imagify API error:",
-      error
-    );
-
-
-    /*
-     * Give useful errors instead of simply
-     * saying "Analysis failed".
-     */
-
-    if (
-      error?.status === 401 ||
-      error?.code === "invalid_api_key"
-    ) {
-
-      return res.status(500).json({
-        error:
-          "OpenAI API key is invalid. Check OPENAI_API_KEY in Vercel."
-      });
-    }
-
-
-    if (
-      error?.status === 429
-    ) {
-
-      return res.status(429).json({
-        error:
-          "AI request was rejected because of rate limits or API credits. Check your OpenAI API billing/usage."
-      });
-    }
-
-
-    if (
-      error?.status === 400
-    ) {
-
-      return res.status(400).json({
-        error:
-          error?.message ||
-          "The AI rejected the image request. Try a clear JPG or PNG image."
-      });
-    }
-
+    console.error("Imagify server error:", error);
 
     return res.status(500).json({
       error:
         error?.message ||
-        "Imagify's AI server encountered an unexpected error."
+        "Unexpected error while analyzing the image."
     });
   }
 }
